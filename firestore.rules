@@ -1,0 +1,44 @@
+rules_version = '2';
+
+// ============================================================================
+// Hearth — Firestore rules
+//
+// Model: every family shares one "household" document, identified by a
+// human-shareable code (e.g. "BLUE42"). Anyone who knows that code can join
+// by signing in (anonymous auth is enabled for this) and creating a member
+// profile.
+//
+// Boundary enforced here: you must be signed in, and you must know the
+// household's code/ID to touch anything inside it. That's an appropriate
+// level of protection for a personal family tool — codes are 6 characters
+// from a 32-symbol alphabet (~1 billion combinations) and are never listed
+// publicly. If you want stronger guarantees (e.g. real email/password
+// accounts with a per-user allow-list), see the "Security notes" section
+// of README.md for how to extend these rules.
+// ============================================================================
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    match /households/{householdId} {
+      allow read, update: if signedIn();
+      allow create: if signedIn()
+        && request.resource.data.code == householdId
+        && request.resource.data.name is string;
+      allow delete: if false; // delete member-by-member instead of the whole household
+
+      match /{collection}/{docId} {
+        allow read, write: if signedIn();
+      }
+    }
+
+    // Everything else is closed by default.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

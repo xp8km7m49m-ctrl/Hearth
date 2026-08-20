@@ -1,0 +1,23 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Editors
+.vscode/
+.idea/
+*.swp
+
+# Firebase
+.firebase/
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
+.firebaserc.local
+
+# Node (only used by scripts/make-icons.js — no runtime deps)
+node_modules/
+npm-debug.log
+
+# Local env overrides, if you ever add any
+.env
+.env.local
